@@ -5,7 +5,7 @@
 
 namespace pimpl_on_stack {
 
-template <class T, std::size_t size, std::size_t align>
+template <class T, std::size_t Size, std::size_t Alignment>
 class Pimpl {
  public:
   template <class... Args>
@@ -14,22 +14,24 @@ class Pimpl {
   }
 
   ~Pimpl() {
-    static_assert(sizeof(T) == size, "Wrong size in Pimpl");
-    static_assert(std::alignment_of<T>::value == align,
-                  "Wrong alignment in Pimp");
+    CheckSizeAndAlignment<Size, Alignment>();
     ptr_->~T();
   }
 
-  Pimpl(Pimpl<T, size, align>&& other) noexcept { *this = std::move(other); }
+  Pimpl(Pimpl<T, Size, Alignment>&& other) noexcept {
+    *this = std::move(other);
+  }
 
-  Pimpl<T, size, align>& operator=(Pimpl<T, size, align>&& other) noexcept {
+  Pimpl<T, Size, Alignment>& operator=(
+      Pimpl<T, Size, Alignment>&& other) noexcept {
     ptr_ = PtrFromStorage();
     *ptr_ = std::move(*other);
     other.ptr_ = nullptr;
   }
 
-  Pimpl(const Pimpl<T, size, align>&) = delete;
-  Pimpl<T, size, align>& operator=(const Pimpl<T, size, align>&) = delete;
+  Pimpl(const Pimpl<T, Size, Alignment>&) = delete;
+  Pimpl<T, Size, Alignment>& operator=(const Pimpl<T, Size, Alignment>&) =
+      delete;
 
   T& operator*() noexcept { return *ptr_; }
   const T& operator*() const noexcept { return *ptr_; }
@@ -48,8 +50,16 @@ class Pimpl {
   }
 
  private:
-  T* PtrFromStorage() { return reinterpret_cast<T*>(storage_); }
-  std::aligned_storage_t<size, align> storage_;
+  T* PtrFromStorage() { return reinterpret_cast<T*>(&storage_); }
+  template <std::size_t UsedSize, std::size_t UsedAlignment,
+            std::size_t RealSize = sizeof(T),
+            std::size_t RealAlignment = std::alignment_of<T>::value>
+  static constexpr void CheckSizeAndAlignment() {
+    static_assert(UsedSize == RealSize, "Wrong size used in pimpl.");
+    static_assert(UsedAlignment == RealAlignment,
+                  "Wrong alignment used in pimpl.");
+  }
+  std::aligned_storage_t<Size, Alignment> storage_;
   T* ptr_ = nullptr;
 };
 
