@@ -36,7 +36,22 @@ TEST(Pimpl, Default_constructor) {
 
 TEST(Pimpl, Move_constructor) {}
 
-TEST(Pimpl, Operator_eq) {}
+TEST(Pimpl, Operator_eq) {
+  bool destructor_used = false;
+  class C {
+   public:
+    C(bool* d_used) : destructor_used_(d_used) {}
+    ~C() { *destructor_used_ = true; }
+
+   private:
+    bool* destructor_used_;
+  };
+  pimpl_on_stack::Pimpl<C, 8, 8> p(&destructor_used);
+  EXPECT_FALSE(p == nullptr);
+  p.reset();
+  EXPECT_TRUE(destructor_used);
+  EXPECT_TRUE(p == nullptr);
+}
 
 TEST(Pimpl, Operator_derefference) {}
 
