@@ -22,7 +22,7 @@ addons:
 
 install:
   # Install conan
-  - pip install conan
+  - sudo pip install conan
 
 script:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9" CC="gcc-9"; fi
