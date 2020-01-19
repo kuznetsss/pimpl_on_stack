@@ -34,7 +34,7 @@ if (${ENABLE_TESTS})
   endif ()
   if (${CONAN_COMPILER} STREQUAL gcc)
     if (${CONAN_COMPILER_VERSION} GREATER_EQUAL 9.1)
-      set(CONAN_COMPILER_VERSION '9.1')
+      set(CONAN_COMPILER_VERSION 9.1)
     endif ()
   endif ()
 
