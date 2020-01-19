@@ -22,9 +22,7 @@ addons:
 
 install:
   # Install conan
-  - wget https://dl.bintray.com/conan/installers/conan-ubuntu-64_1_18_5.deb
-  - sudo dpkg -i conan-ubuntu-64_1_18_5.deb
-  - sudo apt install -f
+  - pip install conan
 
 script:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-9" CC="gcc-9"; fi
