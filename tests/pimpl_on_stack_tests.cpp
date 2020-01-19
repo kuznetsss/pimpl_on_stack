@@ -34,9 +34,34 @@ TEST(Pimpl, Default_constructor) {
   EXPECT_EQ(pimpl->i, kValue);
 }
 
-TEST(Pimpl, Move_constructor) {}
+TEST(Pimpl, Move_constructor) {
+  class C {
+   public:
+    C() = default;
+    C(const C&) = delete;
+    C(C&& other) noexcept {
+        *this = std::move(other);
+    }
+    C& operator=(C&&) noexcept {
+      constructed_by_move_ = true;
+      return *this;
+    }
 
-TEST(Pimpl, Operator_eq) {
+    bool isConstructedByMove() const { return constructed_by_move_; }
+
+   private:
+    bool constructed_by_move_ = false;
+  };
+
+  pimpl_on_stack::Pimpl<C, 1, 1> pimpl;
+  EXPECT_FALSE(pimpl->isConstructedByMove());
+
+  pimpl_on_stack::Pimpl<C, 1, 1> moved_pimpl(std::move(pimpl));
+  EXPECT_TRUE(moved_pimpl->isConstructedByMove());
+  EXPECT_TRUE(pimpl.empty());
+}
+
+TEST(Pimpl, Operator_equals_and_reset) {
   bool destructor_used = false;
   class C {
    public:
@@ -52,10 +77,6 @@ TEST(Pimpl, Operator_eq) {
   EXPECT_TRUE(destructor_used);
   EXPECT_TRUE(p == nullptr);
 }
-
-TEST(Pimpl, Operator_derefference) {}
-
-TEST(Pimpl, Reset) {}
 
 int main(int argc, char* argv[]) {
   testing::InitGoogleTest(&argc, argv);

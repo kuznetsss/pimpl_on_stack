@@ -4,6 +4,7 @@ project(pimpl_on_stack_library)
 set(ENABLE_TESTS TRUE CACHE BOOL "Wether compile tests or not")
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(pimpl_on_stack INTERFACE)
 target_include_directories(pimpl_on_stack INTERFACE include)
@@ -45,7 +46,7 @@ if (${ENABLE_TESTS})
   target_link_libraries(pimpl_on_stack_tests
     PRIVATE
     pimpl_on_stack
-    CONAN_PKG::GTest
+    CONAN_PKG::gtest
     )
   enable_testing()
   add_test(NAME pimpl_on_stack_tests COMMAND pimpl_on_stack_tests)

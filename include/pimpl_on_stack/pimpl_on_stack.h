@@ -15,7 +15,7 @@ class Pimpl {
 
   ~Pimpl() {
     CheckSizeAndAlignment<Size, Alignment>();
-    ptr_->~T();
+    if (ptr_ != nullptr) ptr_->~T();
   }
 
   Pimpl(Pimpl<T, Size, Alignment>&& other) noexcept {
@@ -25,8 +25,9 @@ class Pimpl {
   Pimpl<T, Size, Alignment>& operator=(
       Pimpl<T, Size, Alignment>&& other) noexcept {
     ptr_ = PtrFromStorage();
-    *ptr_ = std::move(*other);
+    *ptr_ = std::move(*other.ptr_);
     other.ptr_ = nullptr;
+    return *this;
   }
 
   Pimpl(const Pimpl<T, Size, Alignment>&) = delete;
@@ -51,6 +52,7 @@ class Pimpl {
 
  private:
   T* PtrFromStorage() { return reinterpret_cast<T*>(&storage_); }
+
   template <std::size_t UsedSize, std::size_t UsedAlignment,
             std::size_t RealSize = sizeof(T),
             std::size_t RealAlignment = std::alignment_of<T>::value>
@@ -59,6 +61,7 @@ class Pimpl {
     static_assert(UsedAlignment == RealAlignment,
                   "Wrong alignment used in pimpl.");
   }
+
   std::aligned_storage_t<Size, Alignment> storage_;
   T* ptr_ = nullptr;
 };
